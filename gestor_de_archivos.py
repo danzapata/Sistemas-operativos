@@ -1,6 +1,7 @@
 # librerías ---------------------------------------------------------------------------------------------------
 import os
 import shutil # para copiar archivos (opción 6)
+import datetime # para mostrar la fecha de modificación (opción 9)
 
 # Funciones de gestión de archivos ----------------------------------------------------------------------------
 
@@ -192,7 +193,9 @@ def consultar_informacion(nombre):
     
     try:
         tamano = os.path.getsize(nombre)
-        fecha_mod = os.path.getmtime(nombre)
+        # Obtenemos el timestamp y lo convertimos a fecha legible con datetime
+        timestamp_mod = os.path.getmtime(nombre)
+        fecha_mod = datetime.datetime.fromtimestamp(timestamp_mod).strftime('%Y-%m-%d %H:%M:%S')
         
         resultado = (
             f"\n--- Información del elemento ---\n"
