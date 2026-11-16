@@ -4,10 +4,10 @@ DOCUMENTACIÓN: GESTOR DE ARCHIVOS EN PYTHON
 Hecho por: 
 
 Nicolas David Zambrano Murcia,
-
 Daniel Alberto Zapata Castaño,  
 Miguel Ángel Quiceno hincapié,  
 Cristhian Camilo Mesias Rodriguez, 
+
 Carlos Augusto Villalobos Cubas 
 
 ================================================================================
