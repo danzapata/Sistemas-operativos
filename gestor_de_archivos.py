@@ -188,25 +188,48 @@ def listar_archivos(nombre_directorio):
         print("El directorio no existe")
 
 def consultar_informacion(nombre):
-    if not os.path.exists(nombre):
-        return "La ruta especificada no existe."
-    
+    if nombre.strip() == "":
+        return "Error: debe ingresar el nombre de un archivo"
+
+    # Igual que en las opciones 3 y 4: si el usuario no escribió ".txt" y ese archivo existe, lo usamos
+    if not os.path.exists(nombre) and os.path.exists(nombre + ".txt"):
+        nombre += ".txt"
+
+    # Carpeta de trabajo: el programa principal hace os.chdir("GESTOR_SO"), así que es el directorio actual.
+    # os.path.realpath resuelve "..", rutas absolutas y accesos directos (enlaces simbólicos)
+    # para saber a dónde apunta realmente la ruta que escribió el usuario.
+    carpeta_trabajo = os.path.realpath(os.getcwd())
+    ruta_real = os.path.realpath(nombre)
+
+    # Bloqueamos cualquier ruta que salga de GESTOR_SO, por ejemplo "../secreto.txt",
+    # "C:\\Windows\\win.ini" o "/etc/passwd", para no tocar archivos personales ni del sistema.
+    # os.path.normcase iguala mayúsculas/minúsculas en Windows para que la comparación sea justa.
+    if not os.path.normcase(ruta_real).startswith(os.path.normcase(carpeta_trabajo) + os.sep):
+        return "Error: solo se pueden consultar archivos dentro de la carpeta GESTOR_SO"
+
+    # Validamos que exista y que sea un archivo (no una carpeta)
+    if os.path.isdir(ruta_real):
+        return "Error: " + nombre + " es una carpeta, no un archivo"
+    if not os.path.isfile(ruta_real):
+        return "Error: el archivo " + nombre + " no existe"
+
     try:
-        tamano = os.path.getsize(nombre)
-        # Obtenemos el timestamp y lo convertimos a fecha legible con datetime
-        timestamp_mod = os.path.getmtime(nombre)
-        fecha_mod = datetime.datetime.fromtimestamp(timestamp_mod).strftime('%Y-%m-%d %H:%M:%S')
-        
-        resultado = (
-            f"\n--- Información del elemento ---\n"
-            f"Nombre: {nombre}\n"
-            f"Tamaño: {tamano} bytes\n"
-            f"Última fecha de modificación: {fecha_mod}\n"
-            f"----------------------------------"
-        )
-        return resultado
+        # os.stat hace una sola llamada al sistema operativo y devuelve todos los metadatos del
+        # archivo (tamaño, fechas, permisos...). Solo lee información, no modifica nada.
+        info = os.stat(ruta_real)
     except OSError as error:
-        return f"Error al consultar la información: {str(error)}"
+        return "Error al consultar la información: " + str(error)
+
+    # st_mtime es la fecha de modificación en segundos desde 1970 (timestamp); la pasamos a texto legible
+    fecha_mod = datetime.datetime.fromtimestamp(info.st_mtime).strftime("%d/%m/%Y %H:%M:%S")
+
+    return (
+        "\n--- Información del archivo ---\n"
+        "Nombre: " + os.path.basename(ruta_real) + "\n"
+        "Tamaño: " + str(info.st_size) + " bytes\n"
+        "Última modificación: " + fecha_mod + "\n"
+        "-------------------------------"
+    )
 
 # Programa principal -------------------------------------------------------------------------------------------------------------------
 
@@ -277,7 +300,7 @@ if __name__ == "__main__":
             input("\nPresione Enter para continuar...")
 
         elif opcion == "9":
-            input_nombre = input("\nIngrese el nombre del archivo o directorio a consultar: ")
+            input_nombre = input("\nIngrese el nombre del archivo a consultar: ")
             print(consultar_informacion(input_nombre))
             input("\nPresione Enter para continuar...")
 
