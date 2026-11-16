@@ -186,10 +186,27 @@ def listar_archivos(nombre_directorio):
     else:
         print("El directorio no existe")
 
+def consultar_informacion(nombre):
+    if not os.path.exists(nombre):
+        return "La ruta especificada no existe."
+    
+    try:
+        tamano = os.path.getsize(nombre)
+        fecha_mod = os.path.getmtime(nombre)
+        
+        resultado = (
+            f"\n--- Información del elemento ---\n"
+            f"Nombre: {nombre}\n"
+            f"Tamaño: {tamano} bytes\n"
+            f"Última fecha de modificación: {fecha_mod}\n"
+            f"----------------------------------"
+        )
+        return resultado
+    except OSError as error:
+        return f"Error al consultar la información: {str(error)}"
 
-# ===================================================
-#               Programa principal
-#====================================================
+# Programa principal -------------------------------------------------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     # Aseguramos que el programa se ejecute si existe la carpeta de trabajo "GESTOR_SO" y nos ubicamos en ella.
@@ -258,15 +275,7 @@ if __name__ == "__main__":
 
         elif opcion == "9":
             input_nombre = input("\nIngrese el nombre del archivo o directorio a consultar: ")
-            if os.path.exists(input_nombre):
-                tamano = os.path.getsize(input_nombre)
-                print(f"\n--- Información ---")
-                print(f"Nombre: {input_nombre}")
-                print(f"Tamaño: {tamano} bytes")
-                print(f"Es directorio: {os.path.isdir(input_nombre)}")
-                print(f"Es archivo: {os.path.isfile(input_nombre)}")
-            else:
-                print("La ruta especificada no existe.")
+            print(consultar_informacion(input_nombre))
             input("\nPresione Enter para continuar...")
 
         elif opcion == "0": # Salida
